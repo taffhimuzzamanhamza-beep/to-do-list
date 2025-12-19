@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: rgb(195, 195, 195);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 350px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #e6f50c;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #db6060;
+            border-radius: 5px;
+        }
+
+        button#addBtn {
+            padding: 10px 15px;
+            background-color: #c57e1b; 
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button#addBtn:hover {
+            background-color: #1777d1;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #b8b3b3;
+            border-bottom: 1px solid #1e50cd;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li.completed span {
+            text-decoration: line-through;
+            color: #681010;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            background-color: #ff4757;
+            color: rgb(255, 255, 255);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .check-btn {
+            cursor: pointer;
+            accent-color: #00b34b;
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>To-Do List</h2>
+    
+    <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Add a new task...">
+        <button id="addBtn">Add</button>
+    </div>
+
+    <ul id="taskList">
+        </ul>
+</div>
+
+<script>
+    let taskInput = document.getElementById('taskInput');
+    let addBtn = document.getElementById('addBtn');
+    let taskList = document.getElementById('taskList');
+    let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+    renderTasks();
+    addBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') addTask();
+    });
+    function addTask() {
+        const taskText = taskInput.value.trim();
+        if (taskText === "") {
+            alert("Please enter a task!");
+            return;
+        }
+        const newTask = {
+            id: Date.now(),
+            text: taskText,
+            completed: false
+        };
+        tasks.push(newTask);
+        saveAndRender();
+        taskInput.value = "";
+    }
+    function renderTasks() {
+        taskList.innerHTML = ""; 
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            if (task.completed) {
+                li.classList.add('completed');
+            }
+            li.innerHTML = `
+                <span>${task.text}</span>
+                <div class="actions">
+                    <input type="checkbox" class="check-btn" 
+                        ${task.completed ? 'checked' : ''} 
+                        onclick="toggleComplete(${task.id})">
+                    <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+                </div>
+            `;
+            taskList.appendChild(li);
+        });
+    }
+    window.toggleComplete = function(id) {
+        tasks = tasks.map(task => {
+            if (task.id === id) {
+                return { ...task, completed: !task.completed };
+            }
+            return task;
+        });
+        saveAndRender();
+    }
+    window.deleteTask = function(id) {
+        tasks = tasks.filter(task => task.id !== id);
+        saveAndRender();
+    }
+    function saveAndRender() {
+        localStorage.setItem('myTasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+</script>
+</body>
+</html>
